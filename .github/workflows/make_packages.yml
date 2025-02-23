@@ -74,3 +74,33 @@ jobs:
         with:
           name: "openboardview_package_linux_rpm.${{ github.sha }}"
           path: '*.rpm'
+  build-and-package_intel-DMG:
+    runs-on: macos-13 # intel runner
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: MacOS dependencies
+        run: brew update && brew install sdl2
+      - name: MacOS build
+        run: TERM=xterm bash ./build.sh --recompile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "openboardview_package_macos13_intel_dmg.${{ github.sha }}"
+          path: '*.dmg'
+  build-and-package_universal-DMG:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: MacOS dependencies
+        uses: BrettDong/setup-sdl2-frameworks@v2 # Installing as a framework to build univeral x86_64 + arm64 binary
+        with:
+          sdl2: 2.32.0
+      - name: MacOS build
+        run: TERM=xterm bash ./build.sh --recompile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "openboardview_package_macos15_universal_dmg.${{ github.sha }}"
+          path: '*.dmg'
