@@ -53,6 +53,10 @@ public:
 	bool infoPanelSelectPartsOnNet = true;
 	bool centerZoomSearchResults = true;
 
+#ifdef _WIN32
+	std::string pdfSoftwarePath = "";
+#endif
+
 	template<size_t N>
 	std::array<uint32_t, N> DecodeKey(const char *keytext);
 

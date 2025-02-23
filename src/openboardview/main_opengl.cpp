@@ -21,6 +21,7 @@
 #include <chrono>
 #include <memory>
 #include <cstdio>
+#include <cmath>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
