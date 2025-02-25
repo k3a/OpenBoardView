@@ -7,6 +7,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
       - uses: docker/setup-buildx-action@v3 # enable caching support for action below
       - uses: docker/build-push-action@v6
         with:
@@ -22,7 +23,7 @@ jobs:
           DOCKER_BUILD_RECORD_UPLOAD: false
       - name: Linux build_DEBUG
         run: >
-          docker run --rm -t -v "$PWD:$PWD" -w "$PWD" openboardview.org/linux-build-env:latest sh -c '
+          docker run --rm -t -v "$PWD:$PWD" -w "$PWD" -u "$(id -u):$(id -g)" openboardview.org/linux-build-env:latest sh -c '
           bash ./build.sh --recompile --debug &&
           mv bin/openboardview bin/openboardview_DEBUG
           '
@@ -32,7 +33,7 @@ jobs:
           path: bin/openboardview_DEBUG
       - name: Linux build
         run: >
-          docker run --rm -t -v "$PWD:$PWD" -w "$PWD" openboardview.org/linux-build-env:latest sh -c '
+          docker run --rm -t -v "$PWD:$PWD" -w "$PWD" -u "$(id -u):$(id -g)" openboardview.org/linux-build-env:latest sh -c '
           bash ./build.sh --recompile &&
           cd release_build &&
           make package
@@ -51,6 +52,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
       - uses: docker/setup-buildx-action@v3 # enable caching support for action below
       - uses: docker/build-push-action@v6
         with:
@@ -66,7 +68,7 @@ jobs:
           DOCKER_BUILD_RECORD_UPLOAD: false
       - name: Mingw build debug
         run: >
-            docker run --rm -t -v "$PWD:$PWD" -w "$PWD" openboardview.org/mingw-deb-based-build-env:latest sh -c '
+            docker run --rm -t -v "$PWD:$PWD" -w "$PWD" -u "$(id -u):$(id -g)" openboardview.org/mingw-deb-based-build-env:latest sh -c '
             CROSS=mingw64 ./build.sh --recompile --debug &&
             mv bin/openboardview.exe bin/openboardview_DEBUG.exe
             '
@@ -76,7 +78,7 @@ jobs:
           path: bin/openboardview_DEBUG.exe
       - name: Mingw build
         run: >
-            docker run --rm -t -v "$PWD:$PWD" -w "$PWD" openboardview.org/mingw-deb-based-build-env:latest sh -c '
+            docker run --rm -t -v "$PWD:$PWD" -w "$PWD" -u "$(id -u):$(id -g)" openboardview.org/mingw-deb-based-build-env:latest sh -c '
             CROSS=mingw64 ./build.sh --recompile
             '
       - uses: actions/upload-artifact@v4
@@ -89,13 +91,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: MacOS dependencies
         run: brew update && brew install sdl2
       - name: MacOS build
         run: TERM=xterm bash ./build.sh --recompile
       - uses: actions/upload-artifact@v4
         with:
-          name: "openboardview_package_macos13_intel_dmg.${{ github.sha }}"
+          name: "openboardview_unsigned_macos13_intel_dmg.${{ github.sha }}"
           path: '*.dmg'
   build-and-package_universal-DMG:
     runs-on: macos-15
@@ -103,6 +106,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: MacOS dependencies
         uses: BrettDong/setup-sdl2-frameworks@v2 # Installing as a framework to build univeral x86_64 + arm64 binary
         with:
@@ -111,7 +115,7 @@ jobs:
         run: TERM=xterm bash ./build.sh --recompile
       - uses: actions/upload-artifact@v4
         with:
-          name: "openboardview_package_macos15_universal_dmg.${{ github.sha }}"
+          name: "openboardview_unsigned_macos15_universal_dmg.${{ github.sha }}"
           path: '*.dmg'
   build-64bit-exe-on-windows:
     runs-on: windows-2025
@@ -119,6 +123,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: Set up shell
         shell: bash
         run: |
