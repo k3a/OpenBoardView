@@ -20,6 +20,9 @@ if(NOT UTF8_INCLUDE_DIR)
 endif()
 
 ## zlib ##
+if(WIN32)
+	set(ZLIB_USE_STATIC_LIBS ON CACHE BOOL "While finding system-provided zlib look for static one")
+endif()
 find_package(ZLIB)
 if(NOT ZLIB_FOUND)
 	execute_process(
