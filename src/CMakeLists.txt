@@ -59,7 +59,9 @@ set(GLAD_API "gl=3.2,gles2=2.0" CACHE STRING "GL versions" FORCE) # Build for Op
 set(GLAD_EXTENSIONS "GL_EXT_texture_compression_s3tc,GL_OES_element_index_uint" CACHE STRING "Gl exts" FORCE) # S3TC used to load texture for pins — delete when removing support. The other is used by GLES2.
 set(GLAD_NO_LOADER ON CACHE BOOL "Disable loader" FORCE) # We're using SDL2 loader
 set(GLAD_REPRODUCIBLE ON CACHE BOOL "Reproducible build" FORCE)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.11) # force glad 1.x compatibility with cmake 4.0
 add_subdirectory(glad)
+unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 ## SDL2 ##
 find_package(SDL2 REQUIRED CONFIG)

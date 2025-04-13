@@ -1,5 +1,4 @@
 PROJECT(SQlite)
-cmake_minimum_required(VERSION 2.8.12)
 
 add_library(SQLite3 STATIC sqlite3.c)
 target_include_directories(SQLite3 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
