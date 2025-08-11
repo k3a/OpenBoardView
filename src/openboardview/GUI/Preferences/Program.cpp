@@ -50,7 +50,7 @@ void Program::render() {
 			if (t > 320) config.windowY = t;
 		}
 
-		std::vector<char> newFont(config.fontName.begin(), config.fontName.end()); // Copy string data + '\0' char
+		std::vector<char> newFont(config.fontName.c_str(), config.fontName.c_str() + config.fontName.size() + 1); // Copy string data + '\0' char
 		if (newFont.size() < 256)                                          // reserve space for new font name
 			newFont.resize(256, '\0');                                     // Max font name length is 255 characters
 		RightAlignedText("Font name", DPI(250));
@@ -90,10 +90,12 @@ void Program::render() {
 		RightAlignedText("PDF software executable", DPI(250));
 		ImGui::SameLine();
 
-		if (config.pdfSoftwarePath.size() < 256)                           // reserve space for path
-			config.pdfSoftwarePath.resize(256, '\0');                      // Max path name length is 255 characters
-
-		ImGui::InputText("##pdfSoftwarePath", config.pdfSoftwarePath.data(), config.pdfSoftwarePath.size());
+		std::vector<char> newpdfSoftwarePath(config.pdfSoftwarePath.c_str(), config.pdfSoftwarePath.c_str() + config.pdfSoftwarePath.size() + 1); // Copy string data + '\0' char
+		if (newpdfSoftwarePath.size() < 32768) // reserve space for new path
+			newpdfSoftwarePath.resize(32768, '\0'); // Max path length is 32768 characters
+		if (ImGui::InputText("##pdfSoftwarePath", newpdfSoftwarePath.data(), newpdfSoftwarePath.size())) {
+			config.pdfSoftwarePath = newpdfSoftwarePath.data();
+		}
 		ImGui::SameLine();
 		if (ImGui::Button("Browse##pdfSoftwarePath")) {
 			auto path = show_file_picker();

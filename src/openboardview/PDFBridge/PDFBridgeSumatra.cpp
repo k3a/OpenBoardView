@@ -34,8 +34,9 @@ PDFBridgeSumatra &PDFBridgeSumatra::GetInstance(Confparse &obvConfig) {
 
 std::string PDFBridgeSumatra::GetDDEString(HSZ hsz) {
 	size_t len = DdeQueryStringW(this->idInst, hsz, nullptr, 0, CP_WINUNICODE); // Lengh of data in characters (trailing NULL char not included)
-	std::wstring wstr(len + 1, '\0');
-	DdeQueryStringW(this->idInst, hsz, wstr.data(), wstr.capacity(), CP_WINUNICODE); // Lengh of data in characters (trailing NULL char not included)
+	std::vector<wchar_t> buf(len + 1);
+	DdeQueryStringW(this->idInst, hsz, buf.data(), buf.size() - 1, CP_WINUNICODE);
+	std::wstring wstr(buf.data());
 	return utf16_to_utf8(wstr);
 }
 
@@ -77,8 +78,11 @@ HDDEDATA CALLBACK PDFBridgeSumatra::DdeCallback(
 
 		case XTYP_EXECUTE: {
 			size_t len = DdeGetData(hdata, nullptr, 0, 0); // Length of data in bytes (trailing NULL char included)
-			std::wstring wstr(len / 2, '\0');
-			DdeGetData(hdata, reinterpret_cast<LPBYTE>(wstr.data()), wstr.capacity() * 2, 0);
+			std::vector<unsigned char> buf(len);
+			DdeGetData(hdata, buf.data(), buf.size(), 0); // Populate buffer of bytes first
+			std::vector<wchar_t> wbuf(len / 2);
+			std::memcpy(wbuf.data(), buf.data(), buf.size()); // Then transfer to buffer of wchar_t
+			std::wstring wstr(wbuf.data()); // To create a wstring from it
 			std::string str = utf16_to_utf8(wstr);
 
 			SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "PDFBridgeSumatra DdeCallback Client execute: %s", str.c_str());
@@ -184,7 +188,11 @@ bool PDFBridgeSumatra::ConnectDDEClient(const std::wstring &service, const std::
 bool PDFBridgeSumatra::ExecuteDDECommand(std::wstring ddeCmd) {
 	SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "PDFBridgeSumatra ExecuteDDECommand ddeCmd: %s", utf16_to_utf8(ddeCmd).c_str());
 
-	HDDEDATA hData = DdeCreateDataHandle(this->idInst, reinterpret_cast<LPBYTE>(ddeCmd.data()), (ddeCmd.size() + 1) * sizeof(wchar_t), 0, nullptr, CF_TEXT, 0);
+	size_t ddeCmd_byte_count = (ddeCmd.size() + 1) * sizeof(std::wstring::traits_type::char_type);
+	std::vector<unsigned char> buf(ddeCmd_byte_count);
+	std::memcpy(buf.data(), ddeCmd.data(), ddeCmd_byte_count);
+
+	HDDEDATA hData = DdeCreateDataHandle(this->idInst, buf.data(), buf.size(), 0, nullptr, CF_TEXT, 0);
 
     if (hData == nullptr)   {
 		UINT ret = DdeGetLastError(this->idInst);
@@ -220,14 +228,15 @@ void PDFBridgeSumatra::OpenDocument(const PDFFile &pdfFile) {
 	// Spawn Sumatra PDF process if DDE connection failed (processs probably not running)
 	if (!this->ConnectDDEClient(this->szService, this->szTopic)) {
 		// Get path of current executable to use SumatraPDF executable from the same directory
-		std::wstring currentExePathStr(32767, '\0');
-		DWORD ret = GetModuleFileNameW(nullptr, currentExePathStr.data(),  currentExePathStr.capacity());
+		std::vector<wchar_t> currentExePathBuf(32768);
+		DWORD ret = GetModuleFileNameW(nullptr, currentExePathBuf.data(), currentExePathBuf.size() - 1);
 		if (ret == 0L) {
 			ret = GetLastError();
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "PDFBridgeSumatra OpenDocument GetModuleFileNameW failed: 0x%08lx", ret);
 			return;
 		}
-		filesystem::path currentExePath{currentExePathStr};
+		filesystem::path currentExePath(currentExePathBuf.begin(), currentExePathBuf.end());
+		currentExePathBuf.clear();
 
 		filesystem::path pdfSoftwarePath{this->obvConfig.ParseStr("pdfSoftwarePath", "SumatraPDF.exe")};
 		if (pdfSoftwarePath.empty()) {
@@ -247,10 +256,11 @@ void PDFBridgeSumatra::OpenDocument(const PDFFile &pdfFile) {
 		}
 
 		std::wstring args = L"\"" + exec + L"\"" + L" " + L"\"" + pdfPathString + L"\"";
+		std::vector<wchar_t> buf(args.c_str(), args.c_str() + args.size() + 1);
 		STARTUPINFO si{};
 		si.cb = sizeof(si);
 		PROCESS_INFORMATION pi{};
-		bool success = CreateProcessW(nullptr, args.data(), nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi);
+		bool success = CreateProcessW(nullptr, buf.data(), nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi);
 		if (!success) {
 			ret = GetLastError();
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "PDFBridgeSumatra OpenDocument CreateProcess '%s' failed: 0x%08lx", utf16_to_utf8(args).c_str(), ret);
