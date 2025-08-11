@@ -55,9 +55,9 @@ For Ubuntu developers, you'll need the following packages at a minimum;
 
 For Fedora, you will need the following packages at a minimum;
 
-	$ dnf groupinstall "Development Tools"
+	$ dnf install @development-tools
 
-	$ dnf install SDL2-devel gtk3-devel fontconfig-devel
+	$ dnf install SDL2-devel gtk3-devel fontconfig-devel cmake
 
 ### Installation
 
