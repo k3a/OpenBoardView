@@ -542,10 +542,10 @@ bool GenCADFile::is_shape_smd(mpc_ast_t *shape_ast) {
 }
 
 char *GenCADFile::get_nonquoted_or_quoted_string_child(mpc_ast_t *parent, const char *name) {
-	constexpr char *quoted_regex = "|nonquoted_string|regex";
-	constexpr char *add_string   = "|string|>";
+	const char quoted_regex[] = "|nonquoted_string|regex";
+	const char add_string[]   = "|string|>";
 
-	static std::string key(1024, '\0'); // Reserve 1024 so we don't need to call malloc on the backend
+	static std::string key(256, '\0'); // Reserve so we don't need to call malloc on the backend
 	key.assign(name);
 	key.append(quoted_regex);
 
@@ -554,7 +554,6 @@ char *GenCADFile::get_nonquoted_or_quoted_string_child(mpc_ast_t *parent, const 
 		return ret_ast->contents;
 	}
 
-	key.clear();
 	key.assign(name);
 	key.append(add_string);
 
