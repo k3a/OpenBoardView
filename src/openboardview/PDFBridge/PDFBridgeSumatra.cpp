@@ -1,6 +1,7 @@
 #include "PDFBridgeSumatra.h"
 
 #include <cassert>
+#include <cstring>
 #include <SDL.h>
 
 #include "win32.h"
