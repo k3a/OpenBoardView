@@ -31,8 +31,12 @@ void PDFFile::loadFromConfig(const filesystem::path &filepath) {
 	path = filepath;
 	path.replace_extension("pdf");
 
-	if (!filesystem::exists(filepath)) // Config file doesn't exist, do not attempt to read or write it and load images
+	if (!filesystem::exists(filepath)) { // Config file doesn't exist, do not attempt to read or write it and load images
+		SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Board configuration file %s does not exist", filepath.generic_string().c_str());
 		return;
+	}
+
+	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Loading PDF file path from board configuration file: %s", filepath.generic_string().c_str());
 
 	auto configDir = filesystem::weakly_canonical(filepath).parent_path();
 

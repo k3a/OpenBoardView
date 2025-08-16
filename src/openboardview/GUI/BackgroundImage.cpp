@@ -17,10 +17,15 @@ BackgroundImage::BackgroundImage(const int &side) : side(reinterpret_cast<const 
 }
 
 void BackgroundImage::loadFromConfig(const filesystem::path &filepath) {
+
 	configFilepath = filepath; // save filepath for latter use with writeToConfig
 
-	if (!filesystem::exists(filepath)) // Config file doesn't exist, do not attempt to read or write it and load images
+	if (!filesystem::exists(filepath)) { // Config file doesn't exist, do not attempt to read or write it and load images
+		SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Board configuration file %s does not exist", filepath.generic_string().c_str());
 		return;
+	}
+
+	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Loading background image settings from board configuration file: %s", filepath.generic_string().c_str());
 
 	auto configDir = filesystem::weakly_canonical(filepath).parent_path();
 
