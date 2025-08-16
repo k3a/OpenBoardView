@@ -891,7 +891,6 @@ void BoardView::ClearAllHighlights(void) {
  */
 void BoardView::Update() {
 	bool open_file = false;
-	// ImGuiIO &io = ImGui::GetIO();
 	char *preset_filename = NULL;
 	ImGuiIO &io           = ImGui::GetIO();
 
@@ -938,7 +937,9 @@ void BoardView::Update() {
 			{
 				int i;
 				for (i = 0; i < fhistory.count; i++) {
-					if (ImGui::MenuItem(fhistory.Trim_filename(fhistory.history[i], 2))) {
+					std::string history_item(fhistory.Trim_filename(fhistory.history[i], 2));
+					history_item += "##History" + std::to_string(i);
+					if (ImGui::MenuItem(history_item.c_str())) {
 						open_file       = true;
 						preset_filename = fhistory.history[i];
 					}
