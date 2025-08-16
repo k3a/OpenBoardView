@@ -8,6 +8,7 @@
 #include "imgui/imgui.h"
 
 #include "GUI/DPI.h"
+#include "GUI/Fonts.h"
 #include "GUI/widgets.h"
 
 namespace Preferences {
@@ -66,11 +67,10 @@ void Program::render() {
 		if (ImGui::InputInt("##fontSize", &t)) {
 			if (t < 8) {
 				t = 8;
-			} else if (t > 50) { // 50 is a value that hopefully should not break with too many fonts and 1024x1024 texture limits
-				t = 50;
+			} else if (t > Fonts::MAX_FONT_SIZE) { // 50 is a value that hopefully should not break with too many fonts and 1024x1024 texture limits
+				t = Fonts::MAX_FONT_SIZE;
 			}
 			config.fontSize = t;
-			boardView.reloadFonts = true;
 		}
 
 		t = config.dpi;

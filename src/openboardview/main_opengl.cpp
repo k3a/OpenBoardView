@@ -320,7 +320,7 @@ int main(int argc, char **argv) {
 	if (g.font_size > 0.0) app.config.fontSize = g.font_size;
 
 	Fonts fonts;
-	std::string loadedFontName = fonts.load(app.config.fontName, app.config.fontSize);
+	std::string loadedFontName = fonts.load(app.config.fontName);
 	if (!loadedFontName.empty()) { // Overwrite saved font name by the one that has just been loaded
 		app.obvconfig.WriteStr("fontName", loadedFontName.c_str());
 	}
@@ -402,7 +402,7 @@ int main(int argc, char **argv) {
 
 		if (app.reloadFonts) {
 			// Needs to happen after frame has been rendered (or before starting a new frame)
-			fonts.reload(app.config.fontName, app.config.fontSize);
+			fonts.reload(app.config.fontName);
 			app.reloadFonts = false;
 		}
 

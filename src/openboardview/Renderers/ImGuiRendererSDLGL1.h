@@ -13,7 +13,6 @@ public:
 	void initFrame();
 	void renderDrawData();
 	void shutdown();
-	void destroyFontsTexture();
 };
 
 #endif

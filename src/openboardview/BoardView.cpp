@@ -30,6 +30,7 @@
 #include "FileFormats/GenCADFile.h"
 #include "FileFormats/XZZPCBFile.h"
 #include "GUI/DPI.h"
+#include "GUI/Fonts.h"
 #include "GUI/widgets.h"
 #include "annotations.h"
 #include "imgui/imgui.h"
@@ -899,6 +900,8 @@ void BoardView::Update() {
 		return;
 	}
 
+	ImGui::PushFont(nullptr, config.fontSize);
+
 	/**
 	 * ** FIXME
 	 * This should be handled in the keyboard section, not here
@@ -1298,6 +1301,8 @@ void BoardView::Update() {
 	RenderOverlay();
 
 	ImGui::PopStyleVar();
+
+	ImGui::PopFont();
 
 	HandlePDFBridgeSelection();
 
@@ -2404,7 +2409,9 @@ inline void BoardView::DrawPins(ImDrawList *draw) {
 				ImVec2 text_size_normalized = font->CalcTextSizeA(1.0f, FLT_MAX, 0.0f, text.c_str());
 
 				float maxfontwidth = psz * 2.125/ text_size_normalized.x; // Fit horizontally with 6.75% overflow (should still avoid colliding with neighbours)
+				maxfontwidth = std::min(Fonts::MAX_FONT_SIZE, maxfontwidth); // Clamp to try not to overflow texture size
 				float maxfontheight = psz * 1.5/ text_size_normalized.y; // Fit vertically with 25% top/bottom padding
+				maxfontheight = std::min(Fonts::MAX_FONT_SIZE, maxfontheight); // Clamp to try not to overflow texture size
 				float maxfontsize = std::min(maxfontwidth, maxfontheight);
 
 				// Font size for pin name only depends on height of text (rather than width of full text incl. net name) to scale to pin bounding box
@@ -2416,20 +2423,6 @@ inline void BoardView::DrawPins(ImDrawList *draw) {
 				ImVec2 pos_pin_name   = ImVec2(pos.x - size_pin_name.x * 0.5f, pos.y - size_pin_name.y);
 				ImVec2 pos_net_name   = ImVec2(pos.x - size_net_name.x * 0.5f, pos.y);
 
-				ImFont *font_pin_name = font;
-				if (maxfontheight < font->FontSize * 0.75) {
-					font_pin_name = ImGui::GetIO().Fonts->Fonts[2]; // Use smaller font for pin name
-				} else if (maxfontheight > font->FontSize * 1.5 && ImGui::GetIO().Fonts->Fonts[1]->FontSize > font->FontSize) {
-					font_pin_name = ImGui::GetIO().Fonts->Fonts[1]; // Use larger font for pin name
-				}
-
-				ImFont *font_net_name = font;
-				if (maxfontsize < font->FontSize * 0.75) {
-					font_net_name = ImGui::GetIO().Fonts->Fonts[2]; // Use smaller font for net name
-				} else if (maxfontsize > font->FontSize * 1.5 && ImGui::GetIO().Fonts->Fonts[1]->FontSize > font->FontSize) {
-					font_net_name = ImGui::GetIO().Fonts->Fonts[1]; // Use larger font for net name
-				}
-
 				// Background rectangle
 				draw->AddRectFilled(ImVec2(pos_net_name.x - m_scale * 0.5f, pos_net_name.y), // Begining of text with slight padding
 										ImVec2(pos_net_name.x + size_net_name.x + m_scale * 0.5f, pos_net_name.y + size_net_name.y), // End of text with slight padding
@@ -2437,8 +2430,8 @@ inline void BoardView::DrawPins(ImDrawList *draw) {
 										m_scale * 0.5f/*rounding*/);
 
 				draw->ChannelsSetCurrent(kChannelText);
-				draw->AddText(font_pin_name, maxfontheight, pos_pin_name, text_color, pin->name.c_str());
-				draw->AddText(font_net_name, maxfontsize, pos_net_name, text_color, pin->net->name.c_str());
+				draw->AddText(font, maxfontheight, pos_pin_name, text_color, pin->name.c_str());
+				draw->AddText(font, maxfontsize, pos_net_name, text_color, pin->net->name.c_str());
 				draw->ChannelsSetCurrent(kChannelPins);
 			}
 		}
@@ -2827,6 +2820,7 @@ inline void BoardView::DrawParts(ImDrawList *draw) {
 					float maxfontwidth = maxwidth / text_size_normalized.x;
 					float maxfontheight = maxheight / text_size_normalized.y;
 					float maxfontsize = std::min(maxfontwidth, maxfontheight);
+					maxfontsize = std::min(Fonts::MAX_FONT_SIZE, maxfontsize); // Clamp to try not to overflow texture size
 
 					ImVec2 text_size{text_size_normalized.x * maxfontsize, text_size_normalized.y * maxfontsize};
 
@@ -2834,12 +2828,6 @@ inline void BoardView::DrawParts(ImDrawList *draw) {
 					ImVec2 pos = CoordToScreen(part->centerpoint.x, part->centerpoint.y); // Computed previously during bounding box generation
 					pos.x -= text_size.x * 0.5f;
 					pos.y -= text_size.y * 0.5f;
-
-					if (maxfontsize < font->FontSize * 0.75) {
-						font = ImGui::GetIO().Fonts->Fonts[2]; // Use smaller font for part name
-					} else if (maxfontsize > font->FontSize * 1.5 && ImGui::GetIO().Fonts->Fonts[1]->FontSize > font->FontSize) {
-						font = ImGui::GetIO().Fonts->Fonts[1]; // Use larger font for part name
-					}
 
 					draw->ChannelsSetCurrent(kChannelText);
 					draw->AddText(font, maxfontsize, pos, m_colors.partTextColor, part->name.c_str());

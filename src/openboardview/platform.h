@@ -26,7 +26,7 @@
 const filesystem::path show_file_picker(bool filterBoards = false);
 
 const std::string get_font_path(const std::string &name);
-const std::vector<char> load_font(const std::string &name);
+std::vector<char> load_font(const std::string &name);
 
 enum class UserDir { Config, Data };
 const std::string get_user_dir(const UserDir userdir);
