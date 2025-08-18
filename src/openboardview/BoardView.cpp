@@ -900,7 +900,9 @@ void BoardView::Update() {
 		return;
 	}
 
-	ImGui::PushFont(nullptr, config.fontSize);
+	// Set global font size and scale with user-defined DPI
+	// Do not use DPIF() here as we do not want to apply display_scale, it is already applied through style.FontScaleDpi
+	ImGui::PushFont(nullptr, (config.fontSize * getDPI()) / 100.0f);
 
 	/**
 	 * ** FIXME
