@@ -73,7 +73,7 @@ if [ $THREADS -eq 1 ]; then
   STRTHREADS="thread"
 fi
 
-if [[ "$(uname -a)" == *"arm64"* ]]; then
+if [ "$(uname -m)" = "arm64" ]; then
   COMPILEFLAGS="$COMPILEFLAGS -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
 fi
 
