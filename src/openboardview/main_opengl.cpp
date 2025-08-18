@@ -18,6 +18,7 @@
 #include "confparse.h"
 #include "resource.h"
 #include <SDL.h>
+#include <algorithm>
 #include <chrono>
 #include <memory>
 #include <cstdio>
