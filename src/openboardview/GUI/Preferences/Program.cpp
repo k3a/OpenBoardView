@@ -80,7 +80,6 @@ void Program::render() {
 			if ((t > 25) && (t < 600)) {
 				config.dpi = t;
 				setDPI(t);
-				boardView.reloadFonts = true;
 			}
 		}
 
