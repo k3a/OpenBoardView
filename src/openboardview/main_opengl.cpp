@@ -284,6 +284,16 @@ int main(int argc, char **argv) {
 	int window_width = g.width * main_scale;
 	int window_height = g.height * main_scale;
 
+	// Cap window width/height to maximum usable screen area to prevent e.g., out-of-screen titlebar in case of low resolution/high scale
+	SDL_Rect window_bounds{};
+
+	if (SDL_GetDisplayUsableBounds(0, &window_bounds) != 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Error: %s\n", SDL_GetError());
+	} else {
+		window_width = std::min(window_width, window_bounds.w);
+		window_height = std::min(window_height, window_bounds.h);
+	}
+
 	// Setup window
 	uint32_t window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 #ifdef _WIN32
