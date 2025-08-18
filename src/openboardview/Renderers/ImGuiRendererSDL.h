@@ -13,6 +13,8 @@
 
 class ImGuiRendererSDL {
 public:
+	static float getDisplayScale();
+
 	explicit ImGuiRendererSDL(SDL_Window *window);
 	virtual ~ImGuiRendererSDL();
 

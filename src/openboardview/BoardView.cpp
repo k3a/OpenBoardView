@@ -73,7 +73,7 @@ int BoardView::ConfigParse(void) {
 	style.AntiAliasedLines = !config.slowCPU;
 	style.AntiAliasedFill  = !config.slowCPU;
 
-	m_info_surface.x = config.infoPanelWidth;
+	m_info_surface.x = DPIF(config.infoPanelWidth); // Convert to DPI-dependent value
 	backgroundImage.enabled = config.showBackgroundImage;
 
 	m_colors.readFromConfig(obvconfig);
@@ -244,7 +244,7 @@ void BoardView::ShowInfoPane(void) {
 		}
 	} else {
 		if (m_dragging_token == 2) {
-			config.infoPanelWidth = m_info_surface.x;
+			config.infoPanelWidth = IDPIF(m_info_surface.x); // Convert back to DPI-independant value
 			obvconfig.WriteInt("infoPanelWidth", m_info_surface.x);
 		}
 		m_dragging_token = 0;

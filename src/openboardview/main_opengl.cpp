@@ -216,6 +216,10 @@ int main(int argc, char **argv) {
 	// Log all messages
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 
+#if SDL_VERSION_ATLEAST(2, 24, 0)
+	SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "system");
+#endif
+
 	/*
 	 * Parse the parameters first up, store the results in the global struct.
 	 *
@@ -274,11 +278,19 @@ int main(int argc, char **argv) {
 		g.renderer = Renderers::get(app.obvconfig.ParseInt("renderer", static_cast<int>(Renderers::Preferred)));
 	}
 
+	float main_scale = ImGuiRendererSDL::getDisplayScale();
+	setDisplayScale(main_scale);
+
+	int window_width = g.width * main_scale;
+	int window_height = g.height * main_scale;
+
 	// Setup window
-	SDL_DisplayMode current;
-	SDL_GetCurrentDisplayMode(0, &current);
+	uint32_t window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+#ifdef _WIN32
+	window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+#endif
 	window = SDL_CreateWindow(
-	    OBV_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, g.width, g.height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	    OBV_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, window_flags);
 	if (window == NULL) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to create the sdlWindow: %s\n", SDL_GetError());
 		cleanupAndExit(1);
@@ -302,6 +314,11 @@ int main(int argc, char **argv) {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable ImGui's keyboard navigation
 	io.IniFilename = NULL;
 	//	io.Fonts->AddFontDefault();
+
+	// Apply system display scale factor to ImGui
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+	style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
 
 	// Main loop
 	bool done             = false;
