@@ -21,9 +21,10 @@ float IDPIF(float x) {
 }
 
 void setDPI(int new_dpi) {
+	static float defaultScrollbarSize = ImGui::GetStyle().ScrollbarSize;
 	dpi = new_dpi;
 	ImGuiStyle &style = ImGui::GetStyle();
-	style.ScrollbarSize *= dpi / 100.0f;
+	style.ScrollbarSize = (defaultScrollbarSize * dpi) / 100.0f;
 }
 
 void setDisplayScale(float v) {
