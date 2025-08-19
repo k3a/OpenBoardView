@@ -42,6 +42,9 @@
 #ifdef _WIN32
 #include "PDFBridge/PDFBridgeSumatra.h"
 #endif
+#ifdef __APPLE__
+#include "osx.h" // configureMenuBar()
+#endif
 
 struct globals {
 	char *input_file = nullptr;
@@ -237,6 +240,11 @@ int main(int argc, char **argv) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Error: %s\n", SDL_GetError());
 		return -1;
 	}
+
+#ifdef __APPLE__
+	// Add some menu items to system and dock menu bar on macOS
+	configureMenuBar();
+#endif
 
 #if SDL_VERSION_ATLEAST(2, 0, 10)
 	// Enable touch gestures on multi-touch touchpads

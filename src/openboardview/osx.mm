@@ -2,6 +2,8 @@
 
 #include "platform.h"
 #include <string>
+#include <SDL.h>
+#import <objc/Object.h>
 #import <Cocoa/Cocoa.h>
 
 #ifndef ENABLE_GTK
@@ -66,6 +68,57 @@ const std::string get_user_dir(const UserDir userdir) {
 		return configPath + "/";
 	else
 		return "./"; // Something went wrong, use current dir.
+}
+
+static void newInstance(id self, SEL _cmd) {
+	NSURL *executableURL = [[NSRunningApplication currentApplication] executableURL];
+        const char *executable = [[executableURL path] UTF8String];
+
+	if (fork() == 0) {
+		execl(executable, executable, nullptr);
+	};
+}
+
+static void openFile(id self, SEL _cmd) {
+	auto filename = show_file_picker().string();
+	if (!filename.empty()) {
+		// Trigger DropFile event which will call BoardView::LoadFile()
+		SDL_Event event;
+		event.type = SDL_DROPFILE;
+		event.drop.file = SDL_strdup(filename.c_str());
+		SDL_PushEvent(&event);
+	}
+}
+
+static NSMenu *applicationDockMenu(id self, SEL _cmd) {
+	NSMenu *dockMenu = [[[NSMenu alloc] initWithTitle:@""] autorelease];
+	[dockMenu addItemWithTitle:@"New window" action:@selector(newInstance:) keyEquivalent:@""];
+	return dockMenu;
+}
+
+void configureMenuBar() {
+	// We cannot extend SDLAppDelegate at compile-time since it is not exposed in the API, so add new methods at runtime instead
+	auto appDelegate = [NSApp delegate];
+	Class delegate_class = object_getClass(appDelegate);
+
+	// Callbacks for menu item clicks
+	class_addMethod(delegate_class, @selector(newInstance:), reinterpret_cast<IMP>(newInstance), "v@:");
+	class_addMethod(delegate_class, @selector(openFile:), reinterpret_cast<IMP>(openFile), "v@:");
+
+	// Dock menu builder
+	class_addMethod(delegate_class, @selector(applicationDockMenu:), reinterpret_cast<IMP>(applicationDockMenu), "v@:");
+
+	NSMenu *fileMenu = [[NSMenu alloc] initWithTitle:@"File"];
+
+	/* Add menu items in File menu */
+	[fileMenu addItemWithTitle:@"New window" action:@selector(newInstance:) keyEquivalent:@"n"];
+	[fileMenu addItemWithTitle:@"Open file" action:@selector(openFile:) keyEquivalent:@"o"];
+
+	NSMenuItem *menuItem = [[NSMenuItem alloc] initWithTitle:@"File" action:nil keyEquivalent:@""];
+	[menuItem setSubmenu:fileMenu];
+
+	// Add File menu to menu bar, just after Application menu and before Window menu (both defined by SDL)
+	[[NSApp mainMenu] insertItem:menuItem atIndex:1];
 }
 
 #endif
