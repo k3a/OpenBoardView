@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 
 	// Setup window
 	uint32_t window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
 	window_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
 #endif
 	window = SDL_CreateWindow(

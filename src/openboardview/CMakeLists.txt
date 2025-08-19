@@ -178,6 +178,7 @@ if(MINGW) # Dirty fix to force linking all libs (esp. libstdc++) statically for 
 	set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
 	set_target_properties(${PROJECT_NAME_LOWER} PROPERTIES LINK_SEARCH_END_STATIC 1)
 elseif(APPLE)
+	set_target_properties(${PROJECT_NAME_LOWER} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/asset/MacOSXBundleInfo.plist.in")
 	set_target_properties(${PROJECT_NAME_LOWER} PROPERTIES MACOSX_BUNDLE_ICON_FILE ${PROJECT_NAME_LOWER})
 	set_target_properties(${PROJECT_NAME_LOWER} PROPERTIES MACOSX_BUNDLE_NAME ${PROJECT_NAME_LOWER})
 	set_target_properties(${PROJECT_NAME_LOWER} PROPERTIES MACOSX_BUNDLE_INFO_STRING "Boardview viewing")
