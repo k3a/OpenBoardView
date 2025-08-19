@@ -54,6 +54,10 @@ const std::array<uint32_t, 44> FZFile::getKeyParity() const {
 	return {{0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1}};
 }
 
+const std::array<uint32_t, 44> FZFile::getBuiltinKey() const {
+	return {};
+}
+
 const std::string FZFile::getKeyErrorMsg() const {
 	return "Invalid FZ key\nFZ Key:\n";
 }
@@ -219,7 +223,9 @@ void FZFile::parse(std::vector<char> &buf, const std::array<uint32_t, 44> &fzkey
 
 	if (check_fz_key(fzkey)) {
 		key = fzkey;
-	} else if (!check_fz_key(key)) { // Try to fallback to built-in key
+	} else if (check_fz_key(getBuiltinKey())) { // Try to fallback to built-in key
+		key = getBuiltinKey();
+	} else {
 		valid = false;
 		error_msg = getKeyErrorMsg();
 		error_msg += fz_key_to_string(fzkey);

@@ -71,9 +71,11 @@ public:
 
 protected:
 	virtual const std::array<uint32_t, 44> getKeyParity() const;
+	virtual const std::array<uint32_t, 44> getBuiltinKey() const;
 	virtual const std::string getKeyErrorMsg() const;
 
 private:
+	std::array<uint32_t, 44> key = {0};
 	std::vector<FZPartDesc> partsDesc;
 
 	template<size_t N>
@@ -86,10 +88,4 @@ private:
 	static char *decompress(char *file_buf, size_t buffer_size, size_t &output_size);
 	void gen_outline();
 	void update_counts();
-
-	// Put your key here.
-	// uint32_t keylength = 2*r + 4; // i.e. buf[0..2r+3]
-	// static constexpr uint32_t key[44] = {0};
-	// static uint32_t key[44] = {0};
-	std::array<uint32_t, 44> key = {0};
 };
