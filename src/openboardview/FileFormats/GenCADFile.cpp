@@ -570,34 +570,41 @@ bool GenCADFile::has_text_content(mpc_ast_t *content_holder, const char *text) {
 }
 
 char *GenCADFile::get_stringtoend_child(mpc_ast_t *parent, const char *name) {
-	char *key = static_cast<char *>(malloc(strlen(name) + 50));
-	sprintf(key, "%s|wrapper_to_end|string_to_end|regex", name);
-	mpc_ast_t *ret_ast = mpc_ast_get_child(parent, key);
+	const char wrapper_string_regex_token[] = "|wrapper_to_end|string_to_end|regex";
+	const char wrapper_string_token[] = "|wrapper_to_end|string|>";
+	const char string_token[] = "|string|>";
+
+	static std::string key(256, '\0'); // Reserve so we don't need to call malloc on the backend
+	key.assign(name);
+	key.append(wrapper_string_regex_token);
+
+	mpc_ast_t *ret_ast = mpc_ast_get_child(parent, key.c_str());
 	if (ret_ast) {
-		free(key);
 		return ret_ast->contents;
 	}
 
-	sprintf(key, "%s|wrapper_to_end|string|>", name);
-	ret_ast = mpc_ast_get_child(parent, key);
+	key.assign(name);
+	key.append(wrapper_string_token);
+
+	ret_ast = mpc_ast_get_child(parent, key.c_str());
 	if (ret_ast) {
 		auto value_ast = mpc_ast_get_child(ret_ast, "regex");
 		if (value_ast) {
-			free(key);
 			return value_ast->contents;
 		}
 	}
 
-	sprintf(key, "%s|string|>", name);
-	ret_ast = mpc_ast_get_child(parent, key);
+	key.assign(name);
+	key.append(string_token);
+
+	ret_ast = mpc_ast_get_child(parent, key.c_str());
 	if (ret_ast) {
 		auto value_ast = mpc_ast_get_child(ret_ast, "regex");
 		if (value_ast) {
-			free(key);
 			return value_ast->contents;
 		}
 	}
-	free(key);
+
 	return nullptr;
 }
 
