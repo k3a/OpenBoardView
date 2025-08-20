@@ -284,7 +284,7 @@ bool GenCADFile::parse_shape_pins_to_component(
 
 					pin.net = get_signal_name_for_component_pin(part->name, pin_ast);
 					if (!pin.net) {
-						char *tmp = static_cast<char *>(malloc(32));
+						char *tmp = new char[32];
 						sprintf(tmp, "NC@%d", nc_counter);
 						pin.net = tmp;
 						nc_counter++;
