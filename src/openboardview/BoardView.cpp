@@ -3579,24 +3579,3 @@ void BoardView::HandlePDFBridgeSelection() {
 		}
 	};
 }
-
-BitVec::~BitVec() {
-	free(m_bits);
-}
-
-void BitVec::Resize(uint32_t new_size) {
-	if (new_size > m_size) {
-		uint32_t bytelen     = 4 * ((m_size + 31) / 32);
-		uint32_t new_bytelen = 4 * ((new_size + 31) / 32);
-		uint32_t *new_bits   = (uint32_t *)malloc(new_bytelen);
-		if (m_bits) {
-			memcpy(new_bits, m_bits, bytelen);
-			free(m_bits);
-			memset((char *)new_bits + bytelen, 0, new_bytelen - bytelen);
-		} else {
-			memset(new_bits, 0, new_bytelen);
-		}
-		m_bits = new_bits;
-	}
-	m_size = new_size;
-}

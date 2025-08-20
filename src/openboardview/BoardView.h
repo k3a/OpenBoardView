@@ -27,35 +27,6 @@
 struct BRDPart;
 class BRDFile;
 
-struct BitVec {
-	uint32_t *m_bits;
-	// length of the BitVec in bits
-	uint32_t m_size;
-
-	~BitVec();
-	void Resize(uint32_t new_size);
-
-	bool operator[](uint32_t index) {
-		return 0 != (m_bits[index >> 5] & (1u << (index & 0x1f)));
-	}
-
-	void Set(uint32_t index, bool val) {
-		uint32_t &slot = m_bits[index >> 5];
-		uint32_t bit   = (1u << (index & 0x1f));
-		slot &= ~bit;
-		if (val) {
-			slot |= bit;
-		}
-	}
-
-	void Clear() {
-		uint32_t num_ints = m_size >> 5;
-		for (uint32_t i = 0; i < num_ints; i++) {
-			m_bits[i] = 0;
-		}
-	}
-};
-
 // enum DrawChannel { kChannelImages = 0, kChannelFill, kChannelPolylines = 1, kChannelPins = 2, kChannelText = 3,
 // kChannelAnnotations = 4, NUM_DRAW_CHANNELS = 5 };
 enum DrawChannel {
