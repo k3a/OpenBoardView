@@ -128,7 +128,7 @@ std::string ImGuiRendererSDL::loadTextureFromFile(const filesystem::path &filepa
 	}
 
 	if (image_height > glMaxTextureSize) {
-		return filepath.string() + ": height of " + std::to_string(image_width) + "px is too large for this GPU. Maximum allowed: " + std::to_string(glMaxTextureSize);
+		return filepath.string() + ": height of " + std::to_string(image_height) + "px is too large for this GPU. Maximum allowed: " + std::to_string(glMaxTextureSize);
 	}
 
 	// Create a OpenGL texture identifier
