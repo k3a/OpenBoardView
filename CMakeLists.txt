@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 
 # Set OSX target version, before calling project() (inside version.cmake). FORCE is needed when project() is called within an included file
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version" FORCE)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
 
 # Set a default build type like suggested in official blog https://www.kitware.com/cmake-and-the-default-build-type/
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
